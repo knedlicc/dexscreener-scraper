@@ -1,6 +1,6 @@
 # 🔍 DexScreener Contract Scraper
 
-A robust web scraping tool designed to extract token contract addresses from DexScreener.com. This utility leverages undetected ChromeDriver to bypass anti-bot protections and intelligently handles Cloudflare challenges.
+A robust web scraping tool designed to extract token contract addresses of new pairs from [DexScreener.com](https://dexscreener.com). This utility leverages undetected ChromeDriver to bypass anti-bot protections and intelligently handles Cloudflare challenges.
 
 ## ✨ Features
 
@@ -14,37 +14,39 @@ A robust web scraping tool designed to extract token contract addresses from Dex
 ## 🚀 Installation
 
 1. Clone this repository:
-      git clone https://github.com/yourusername/dexscreener-scraper.git
+   ```bash
+   git clone https://github.com/knedlicc/dexscreener-scraper.git
    cd dexscreener-scraper
    ```
 
 2. Install required dependencies:
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
 
-3. Ensure you have Chrome browser installed on your system.
+3. Ensure you have latest Chrome browser installed on your system.
 
 ## 📋 Usage
-
-### Basic Example
-python
-from dexscreener_scraper import scrape_dexscreener
-
-# Scrape Ethereum trending pairs
-scrape_dexscreener(
-    chain="ethereum",
-    rank_by="trendingScoreH6",
-    order="desc",
-    min_liquidity=25000,
-    max_age=720,
-    output_file="eth_contracts.txt"
-)
 
 ### Command Line Execution
 
 Simply run the script:
+```bash
 python dexscreener_scraper.py
+```
+### Custom Configuration
+
+Edit the `main()` function in the script to customize parameters:
+```python
+def main():
+    scrape_dexscreener(
+        chain="ethereum",          # Choose blockchain network
+        rank_by="trendingScoreH6", # Sort by trending score
+        order="desc",              # Descending order
+        min_liquidity=25000,       # Minimum $25,000 liquidity
+        max_age=720,               # Tokens less than 12 hours old
+        output_file="eth_contracts.txt" # Output filename
+    )
 ```
 
 ### Configuration Parameters
@@ -52,7 +54,7 @@ python dexscreener_scraper.py
 | Parameter | Description | Default | Options |
 |-----------|-------------|---------|---------|
 | `chain` | Blockchain to scrape | `"ethereum"` | `"ethereum"`, `"bsc"`, `"polygon"`, `"avalanche"`, etc. |
-| `rank_by` | Ranking metric | `"trendingScoreH6"` | `"trendingScoreH6"`, `"volumeH24"`, `"marketCap"`, etc. |
+| `rank_by` | Ranking metric | `"trendingScoreH6"` | `"trendingScoreH6"`, `"volume"`, `"marketCap"`, etc. |
 | `order` | Sort order | `"desc"` | `"asc"`, `"desc"` |
 | `min_liquidity` | Minimum liquidity in USD | `25000` | Any positive integer |
 | `max_age` | Max pair age in minutes | `720` | Any positive integer |
@@ -74,16 +76,7 @@ The script is designed to wait for automatic Cloudflare resolution. If automatic
 5. 💾 Saves the addresses to a text file
 6. 🧹 Properly cleans up by closing the browser
 
-## 🔧 Technical Implementation
-
-The tool uses several techniques to effectively scrape DexScreener:
-
-- 🔄 **Patched Chrome Destructor**: Prevents OSError during browser cleanup
-- ✅ **Content Detection**: Uses multiple methods to verify page content has loaded
-- 🎯 **CSS Selectors**: Targets specific DexScreener elements for extraction
-- 📢 **Signaling**: Uses proper signal handling to ensure clean browser termination
-
-## ❓ Troubleshooting
+## 🔧 Troubleshooting
 
 - 🌐 **Browser Not Starting**: Ensure Chrome is installed and up-to-date
 - 📭 **No Addresses Found**: Check your filter parameters or network connectivity
@@ -101,4 +94,4 @@ The tool uses several techniques to effectively scrape DexScreener:
 
 ## 📜 License
 
-MIT
+MIT License
