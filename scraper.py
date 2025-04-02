@@ -1,6 +1,7 @@
 import os
 import random
 import time
+import requests
 import undetected_chromedriver as uc
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -157,11 +158,24 @@ def scrape_dexscreener(
         contracts_on_page = parse_contracts(driver.page_source, chain)
         contracts.extend(contracts_on_page)
         print(f"✅ Found {len(contracts_on_page)} contracts from the page.")
-        # Save contracts to a file
+        
+    
+        # Parse addresses properly
+        pair_addresses = [parse_address(addr) for addr in contracts]
+        
         with open(output_file, "w") as f:
-            for contract in contracts:
-                f.write(contract + "\n")
-        print(f"💾 Saved {len(contracts)} contracts to {output_file}.")
+            for pair_address in pair_addresses:
+                print(f"Processing pair: {pair_address}")
+                
+                # First get the base token address from DexScreener
+                base_token_address = get_base_token_address(pair_address)
+                
+                if not base_token_address:
+                    print(f"Skipping {pair_address} as no base token was found")
+                    continue
+                f.write(base_token_address + "\n")
+                
+        print(f"💾 Saved contracts addresses to {output_file}.")
     
     except Exception as e:
         print(f"❌ An error occurred: {str(e)}")
@@ -175,14 +189,49 @@ def scrape_dexscreener(
             except Exception as e:
                 print(f"⚠️ Error during browser shutdown: {e}")
 
+def parse_address(address_line):
+    # Check if the address contains multiple addresses separated by hyphens
+    if "-" in address_line:
+        parts = address_line.split("-")
+        # Take the middle address if there are multiple
+        if len(parts) >= 3:
+            return parts[1]
+        elif len(parts) == 2:
+            return parts[0]  # Default to first if only two parts
+    
+    # Return the original if no hyphens
+    return address_line
+
+def get_base_token_address(pair_address):
+    """
+    Get the base token address from DexScreener API for a given pair address.
+    """
+    try:
+        url = f"https://api.dexscreener.com/latest/dex/pairs/ethereum/{pair_address}"
+        response = requests.get(url)
+        data = response.json()
+
+        if "pairs" in data and len(data["pairs"]) > 0:
+            base_token = data["pairs"][0].get("baseToken", {})
+            base_address = base_token.get("address")
+            if base_address:
+                print(f"Found base token address: {base_address} for pair: {pair_address}")
+                return base_address
+
+        print(f"No base token found for pair: {pair_address}")
+        return None
+    except Exception as e:
+        print(f"Error fetching base token for {pair_address}: {str(e)}")
+    return None
+
 def main():
     # Example usage with user-defined filters
     scrape_dexscreener(
         chain="ethereum",  # Ethereum chain
         rank_by="trendingScoreH6",  # Rank by trending score (6h)
-        order="asc",  # Ascending order
+        order="desc",  # Ascending order
         min_liquidity=25000,  # Minimum liquidity
-        max_age=720,  # 12 hours (720 minutes)
+        max_age=720,  # 720 hours (30 days) max age
         output_file="eth_contracts.txt"  # Output file
     )
 
