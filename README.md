@@ -32,7 +32,7 @@ A robust web scraping tool designed to extract token contract addresses of new p
 
 Simply run the script:
 ```bash
-python dexscreener_scraper.py
+python scraper.py
 ```
 ### Custom Configuration
 
